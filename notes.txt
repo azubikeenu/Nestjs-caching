@@ -1,0 +1,29 @@
+TO USE REDIS STORE 
+install cache-manager-redis-store 
+import * as redisStore from ' cache-manager-redis-store '
+@Module({
+  imports: [
+    CacheModule.registerAsync({
+      isGlobal: true,
+      store : redisStore,
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        ttl: configService.get<number>('CACHE_TTL'),
+        max: configService.get<number>('CACHE_MAX'),
+        host:configService.get<number>('REDIS_HOST'),
+        port :configService.get<number>('REDIS_PORT'),
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+
+    // to apply caching globally
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
+    },
+  ],
+})
